@@ -21,8 +21,23 @@ def traverse_nodes(node, board, state, identity):
     Returns:        A node from which the next stage of the search can proceed.
 
     """
-    pass
+    #pass
     # Hint: return leaf_node
+
+    def best_child(nodebc):
+        bc = {}
+        for x in nodebc.child_nodes:
+            if x.visits is not 0:
+                bc[x] = x.wins / x.visits + explore_faction * sqrt(2 * log(nodebc.visits) / x.visits)
+        return max(bc, key=bc.get)
+
+    while node is not None:
+        if not len(node.untried_actions) is 0:
+            return expand_leaf(node, board, state)
+        else:
+            node = best_child(node)
+
+    return node
 
 
 def expand_leaf(node, board, state):
@@ -43,6 +58,7 @@ def expand_leaf(node, board, state):
     # Hint: return new_node
 
     action = choice(node.untried_actions)
+    node.untried_actions.remove(action)
     new_node = MCTSNode(parent=node, parent_action=action, action_list=board.legal_actions(state))
     node.child_nodes[new_node] = board.next_state(state, action)
 
