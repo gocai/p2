@@ -39,8 +39,14 @@ def expand_leaf(node, board, state):
     Returns:    The added child node.
 
     """
-    pass
+    #pass
     # Hint: return new_node
+
+    action = choice(node.untried_actions)
+    new_node = MCTSNode(parent=node, parent_action=action, action_list=board.legal_actions(state))
+    node.child_nodes[new_node] = board.next_state(state, action)
+
+    return new_node
 
 
 def rollout(board, state):
@@ -71,7 +77,15 @@ def backpropagate(node, won):
         do update states in node
         backpropagate(node.parent,score)
     """
-    pass
+    #pass
+
+    if node.parent is None:
+        return
+    node.wins += won
+    node.visits += 1
+    backpropagate(node.parent, node.wins)
+
+    return
 
 
 def think(board, state):
