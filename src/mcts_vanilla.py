@@ -24,20 +24,23 @@ def traverse_nodes(node, board, state, identity):
     #pass
     # Hint: return leaf_node
 
-    def best_child(nodebc):
-        bc = {}
-        for x in nodebc.child_nodes:
-            if x.visits is not 0:
-                bc[x] = x.wins / x.visits + explore_faction * sqrt(2 * log(nodebc.visits) / x.visits)
-        return max(bc, key=bc.get)
-
     while node is not None:
-        if not len(node.untried_actions) is 0:
+        if len(node.untried_actions) != 0:
             return expand_leaf(node, board, state)
         else:
             node = best_child(node)
 
     return node
+
+
+def best_child(node):
+    bc = {}
+    for x in node.child_nodes:
+        #if x.visits != 0 and node.visits != 0:
+        bc[x] = x.wins / (x.visits + 1) + explore_faction * sqrt(2 * log(node.visits + 1) / (x.visits + 1))
+    return max(bc, key=bc.get)
+
+
 
 
 def expand_leaf(node, board, state):
@@ -131,6 +134,16 @@ def think(board, state):
         node = root_node
 
         # Do MCTS - This is all you!
+
+        for num_nodes_explore in range(num_nodes):
+            node_explore = traverse_nodes(root_node, board, sampled_game, identity_of_bot)
+            delta = rollout(board, sampled_game)
+            if identity_of_bot == 1:
+                backpropagate(node_explore, delta[1])
+            else:
+                backpropagate(node_explore, delta[2])
+        return best_child(root_node).parent_action
+
 
     # Return an action, typically the most frequently used action (from the root) or the action with the best
     # estimated win rate.
