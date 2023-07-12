@@ -27,12 +27,12 @@ def traverse_nodes(node, board, state, identity):
     while not board.is_ended(state):
         if node.untried_actions:
             return expand_leaf(node, board, state)
-        node = best_child(node, board, state, identity)
+        node = best_child(node, board, state, identity, explore_faction)
         state = board.next_state(state, node.parent_action)
     return node
 
 
-def best_child(node, board, state, identity):
+def best_child(node, board, state, identity, ef):
 
     max_child = None
     max_win = -10
@@ -45,7 +45,7 @@ def best_child(node, board, state, identity):
                 winrate = 1 - winrate
             if node.visits != 0:
                 explore = sqrt(log(node.visits) / childnode.visits)
-        full_rate = winrate + explore_faction * explore
+        full_rate = winrate + ef * explore
         if max_child is None or full_rate > max_win:
             max_child = childnode
             max_win = full_rate
@@ -153,7 +153,7 @@ def think(board, state):
     # Return an action, typically the most frequently used action (from the root) or the action with the best
     # estimated win rate.
 
-    return best_child(root_node, board, state, identity_of_bot).parent_action
+    return best_child(root_node, board, state, identity_of_bot, 0).parent_action
 
 
 def recover_state(board, root, node, state):
