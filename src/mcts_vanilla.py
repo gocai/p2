@@ -24,21 +24,32 @@ def traverse_nodes(node, board, state, identity):
     #pass
     # Hint: return leaf_node
 
-    while node is not None:
-        if len(node.untried_actions) != 0:
+    while not board.is_ended(state):
+        if node.untried_actions:
             return expand_leaf(node, board, state)
         else:
-            node = best_child(node)
-
+            node = best_child(node, board, state, identity)
     return node
 
 
-def best_child(node):
-    bc = {}
-    for x in node.child_nodes:
-        #if x.visits != 0 and node.visits != 0:
-        bc[x] = x.wins / (x.visits + 1) + explore_faction * sqrt(2 * log(node.visits + 1) / (x.visits + 1))
-    return max(bc, key=bc.get)
+def best_child(node, board, state, identity):
+
+    max_child = None
+    max_win = -10
+    winrate = 0
+    explore = 0
+    for childnode in node.child_nodes.values():
+        if childnode.visits != 0:
+            winrate = childnode.wins / childnode.visits
+            if board.current_player(state) != identity:
+                winrate = 1 - winrate
+            if node.visits != 0:
+                explore = sqrt(log(node.visits) / childnode.visits)
+        full_rate = winrate + explore_faction * explore
+        if max_child is None or full_rate > max_win:
+            max_child = childnode
+            max_win = full_rate
+    return max_child
 
 
 
@@ -62,8 +73,9 @@ def expand_leaf(node, board, state):
 
     action = choice(node.untried_actions)
     node.untried_actions.remove(action)
-    new_node = MCTSNode(parent=node, parent_action=action, action_list=board.legal_actions(state))
-    node.child_nodes[new_node] = board.next_state(state, action)
+    new_state = board.next_state(state, action)
+    new_node = MCTSNode(parent=node, parent_action=action, action_list=board.legal_actions(new_state))
+    node.child_nodes[action] = new_node
 
     return new_node
 
@@ -84,8 +96,7 @@ def rollout(board, state):
     while not board.is_ended(state):
         action = choice(board.legal_actions(state))
         state = board.next_state(state, action)
-
-    return board.points_values(state)
+    return state
 
 
 def backpropagate(node, won):
@@ -108,7 +119,7 @@ def backpropagate(node, won):
         return
     node.wins += won
     node.visits += 1
-    backpropagate(node.parent, node.wins)
+    backpropagate(node.parent, won)
 
     return
 
@@ -135,16 +146,13 @@ def think(board, state):
 
         # Do MCTS - This is all you!
 
-        for num_nodes_explore in range(num_nodes):
-            node_explore = traverse_nodes(root_node, board, sampled_game, identity_of_bot)
-            delta = rollout(board, sampled_game)
-            if identity_of_bot == 1:
-                backpropagate(node_explore, delta[1])
-            else:
-                backpropagate(node_explore, delta[2])
-        return best_child(root_node).parent_action
-
+        node_explore = traverse_nodes(node, board, sampled_game, identity_of_bot)
+        delta = rollout(board, sampled_game)
+        if identity_of_bot == 1:
+            backpropagate(node_explore, board.points_values(delta)[1])
+        else:
+            backpropagate(node_explore, board.points_values(delta)[2])
 
     # Return an action, typically the most frequently used action (from the root) or the action with the best
     # estimated win rate.
-    return None
+    return best_child(root_node, board, state, identity_of_bot).parent_action
