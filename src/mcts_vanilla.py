@@ -115,7 +115,7 @@ def backpropagate(node, won):
     """
     #pass
 
-    if node.parent is None:
+    if node is None:
         return
     node.wins += won
     node.visits += 1
@@ -148,7 +148,7 @@ def think(board, state):
 
         node = traverse_nodes(node, board, state, identity_of_bot)
         delta = rollout(board, recover_state(board, root_node, node, state))
-        backpropagate(node, board.points_values(delta)[identity_of_bot] > 0)
+        backpropagate(node, board.points_values(delta)[identity_of_bot])
 
     # Return an action, typically the most frequently used action (from the root) or the action with the best
     # estimated win rate.
