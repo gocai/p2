@@ -29,7 +29,7 @@ def traverse_nodes(node, board, state, identity):
             return expand_leaf(node, board, state)
         node = best_child(node, board, state, identity)
         state = board.next_state(state, node.parent_action)
-    return node, state
+    return node
 
 
 def best_child(node, board, state, identity):
@@ -77,7 +77,7 @@ def expand_leaf(node, board, state):
     new_node = MCTSNode(parent=node, parent_action=action, action_list=board.legal_actions(new_state))
     node.child_nodes[action] = new_node
 
-    return new_node, new_state
+    return new_node
 
 
 def rollout(board, state):
@@ -115,7 +115,7 @@ def backpropagate(node, won):
     """
     #pass
 
-    if node is None:
+    if node.parent is None:
         return
     node.wins += won
     node.visits += 1
@@ -139,18 +139,28 @@ def think(board, state):
 
     for step in range(num_nodes):
         # Copy the game for sampling a playthrough
-        sampled_game = state
+        #sampled_game = state
 
         # Start at root
         node = root_node
 
         # Do MCTS - This is all you!
 
-        node_explore, sampled_game = traverse_nodes(node, board, sampled_game, identity_of_bot)
-        delta = rollout(board, sampled_game)
-        backpropagate(node_explore, board.points_values(delta)[identity_of_bot] > 0)
+        node = traverse_nodes(node, board, state, identity_of_bot)
+        delta = rollout(board, recover_state(board, root_node, node, state))
+        backpropagate(node, board.points_values(delta)[identity_of_bot] > 0)
 
     # Return an action, typically the most frequently used action (from the root) or the action with the best
     # estimated win rate.
 
     return best_child(root_node, board, state, identity_of_bot).parent_action
+
+
+def recover_state(board, root, node, state):
+    actions = []
+    while node != root:
+        actions.append(node.parent_action)
+        node = node.parent
+    for action in reversed(actions):
+        state = board.next_state(state, action)
+    return state
