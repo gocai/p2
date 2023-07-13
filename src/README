@@ -1,0 +1,11 @@
+Group members: Gordon Cai, Chris Tillman
+Modifications for mcts_modified.py: In the vanilla mcts, the rollout function grabs a random legal action,
+calls next state with that action, and continues forward until the an end state is reached. In our modified
+mcts, rather than grabbing an action at random, we check the current number of owned boxes of each player,
+then check through each legal action call next state with that action, then we check the number of owned
+boxes again and if the action resulted in one player's number of owned boxes increasing then we go with that
+state, and if no actions lead to an increase in owned boxes then we grab an action at random. This should
+improve the mcts algorithm by selecting better action pathways in the rollout, where normally the action chosen
+is random, we instead grab one that completes a box, if it exists, as this gets the player who's turn it is
+into a better position by securing a box, and therefore is a more optimal path of actions when seeking which
+set of moves is best.
