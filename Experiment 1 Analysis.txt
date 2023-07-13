@@ -1,0 +1,5 @@
+According to our experiement with differing tree sizes, we came to the conclusion that a higher tree size would 
+result in a better win percentage, up to a point. For our 100 versus 300 simulation, the 300 bot won significantly
+more than the 100 bot. Even more so for the 500 bot. Past 500, the differences in the win/loss/tie ratio were
+negligible, and we even noticed that the win percentage was slightly worse for the 800 and 1000 tree size simulations.
+In conclusion, a higher tree size will increase win percentages to a point, then taper off.
