@@ -1,0 +1,2 @@
+After our tests with vanilla and modified, we came up with the following conclusions. When vanilla has a lower tree count, 
+modified will win. With equal tree counts, modified loses. When vanilla has a higher tree count, modified will start to win again.
