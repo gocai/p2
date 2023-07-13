@@ -94,27 +94,11 @@ def rollout(board, state):
     #pass
 
     while not board.is_ended(state):
-        action = choice(board.legal_actions(state))
-        state = board.next_state(state, action)
-    return state
-
-    '''owned_boxes = board.owned_boxes(state)
-    for i in range(3):
-        for j in range(3):'''
-
-    '''while not board.is_ended(state):
-        owned_boxes = board.owned_boxes(state)
-        for i in range(3):
-            if sum(owned_boxes.get((i, j), 0) == 1 for j in range(3)) == 2:
-                state = board.next_state(state, )
-    return state'''
-
-    '''while not board.is_ended(state):
         owned_boxes = board.owned_boxes(state)
         one_score = len([v for v in owned_boxes.values() if v == 1])
         two_score = len([v for v in owned_boxes.values() if v == 2])
         check = False
-        for action in board.legal_actions:
+        for action in board.legal_actions(state):
             next_state = board.next_state(state, action)
             owned_boxes = board.owned_boxes(next_state)
             one_score2 = len([v for v in owned_boxes.values() if v == 1])
@@ -125,65 +109,7 @@ def rollout(board, state):
         if not check:
             action = choice(board.legal_actions(state))
             state = board.next_state(state, action)
-    return state'''
-
-    def outcome(owned_boxes, game_points, board1, state1):
-        if game_points is not None:
-            # Try to normalize it up?  Not so sure about this code anyhow.
-            red_score = game_points[1] * 9
-            blue_score = game_points[2] * 9
-        else:
-            red_score = len([v for v in owned_boxes.values() if v == 1])
-            blue_score = len([v for v in owned_boxes.values() if v == 2])
-        return red_score - blue_score if board1.current_player(state1) == 1 else blue_score - red_score
-
-    curr_state = state
-    curr_action = 0
-
-    while not board.is_ended(curr_state) and curr_action < 5:
-        curr_action += 1
-        best_expectation = float('-inf')
-        best_move = None
-        for move in board.legal_actions(curr_state):
-            total_score = 0.0
-
-            # Sample a set number of games where the target move is immediately applied.
-            for r in range(5):
-                rollout_state = board.next_state(curr_state, move)
-
-                # Only play to the specified depth.
-                # for i in range(MAX_DEPTH):
-                #     if board.is_ended(rollout_state):
-                #         break
-                #     rollout_move = choice(board.legal_actions(rollout_state))
-                #     rollout_state = board.next_state(rollout_state, rollout_move)
-                curr_depth = 0
-                while not board.is_ended(rollout_state) and curr_depth < 3:
-                    rollout_move = choice(board.legal_actions(rollout_state))
-                    rollout_state = board.next_state(rollout_state, rollout_move)
-                    curr_depth += 1
-
-                total_score += outcome(board.owned_boxes(rollout_state),
-                                       board.points_values(rollout_state), board, curr_state)
-
-            # expectation = float(total_score) / ROLLOUTS
-            # expectation = float(total_score)
-
-            # If the current move has a better average score, replace best_move and best_expectation
-            # if expectation > best_expectation:
-            if total_score > best_expectation:
-                best_expectation = total_score
-                # best_expectation = expectation
-                best_move = move
-                # if expectation == 1:
-                #     break
-        curr_state = board.next_state(curr_state, best_move)
-        # print(curr_state)
-    while not board.is_ended(curr_state):
-        curr_state = board.next_state(curr_state, choice(board.legal_actions(curr_state)))
-
-    # print("Returning curr_state!", curr_state)
-    return curr_state
+    return state
 
 
 def backpropagate(node, won):
